@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 
 using namespace std;
 
@@ -9,8 +10,8 @@ class nohArvore
 	friend class avl;
 
 private:
-	nohArvore *esquerda;
-	nohArvore *direita;
+	nohArvore *esquerdo;
+	nohArvore *direito;
 	nohArvore *pai;
 	Dado valor;
 	int altura;
@@ -39,7 +40,7 @@ private:
 	nohArvore *rotacionaDireita(nohArvore *atual);
 	nohArvore *removeArvoreAux(nohArvore *atual, Dado dado);
 	void percorreInserindoEmArvoreAux(nohArvore *umNoh);
-	void armazenaArvoreEmVetorAux(nohArvore* raiz, int *vetor, unsigned int *i);
+	void armazenaArvoreEmVetorAux(nohArvore *raiz, int *vetor, unsigned int *i);
 
 public:
 	avl();
@@ -54,6 +55,8 @@ public:
 	unsigned getTamanhoArvore();
 	void percorreInserindoEmArvore(nohArvore *raiz);
 	void intersecaoArvores(nohArvore *raizC1, nohArvore *raizC2);
+	void imprimeArvoreBonita();
+	void imprimeArvoreBonita(const string &prefixo, const nohArvore* raiz, bool esquerdo);
 };
 
 unsigned avl::getTamanhoArvore()
@@ -81,22 +84,22 @@ int nohArvore::calculaBalanceamento(nohArvore *no)
 
 int nohArvore::fatorBalanceamento()
 {
-	return (calculaAltura(esquerda) - calculaAltura(direita));
+	return (calculaAltura(esquerdo) - calculaAltura(direito));
 }
 
 nohArvore::nohArvore(Dado dado)
 {
 	valor = dado;
-	esquerda = NULL;
-	direita = NULL;
+	esquerdo = NULL;
+	direito = NULL;
 	altura = 1;
 	pai = NULL;
 }
 
 nohArvore::~nohArvore()
 {
-	delete esquerda;
-	delete direita;
+	delete esquerdo;
+	delete direito;
 }
 
 avl::avl()
@@ -116,13 +119,13 @@ void avl::transplanta(nohArvore *antigo, nohArvore *novo)
 	{
 		raiz = novo;
 	}
-	else if (antigo == antigo->pai->esquerda)
+	else if (antigo == antigo->pai->esquerdo)
 	{
-		antigo->pai->esquerda = novo;
+		antigo->pai->esquerdo = novo;
 	}
 	else
 	{
-		antigo->pai->direita = novo;
+		antigo->pai->direito = novo;
 	}
 
 	if (novo != NULL)
@@ -147,13 +150,13 @@ nohArvore *avl::insereArvoreAux(nohArvore *atual, Dado dado)
 
 	if (dado < atual->valor)
 	{
-		atual->esquerda = insereArvoreAux(atual->esquerda, dado);
-		atual->esquerda->pai = atual;
+		atual->esquerdo = insereArvoreAux(atual->esquerdo, dado);
+		atual->esquerdo->pai = atual;
 	}
 	else if (dado > atual->valor)
 	{
-		atual->direita = insereArvoreAux(atual->direita, dado);
-		atual->direita->pai = atual;
+		atual->direito = insereArvoreAux(atual->direito, dado);
+		atual->direito->pai = atual;
 	}
 	else
 	{
@@ -165,8 +168,8 @@ nohArvore *avl::insereArvoreAux(nohArvore *atual, Dado dado)
 
 nohArvore *avl::arrumaBalanceamento(nohArvore *atual)
 {
-	unsigned int alturaEsq = atual->calculaAltura(atual->esquerda);
-	unsigned int alturaDir = atual->calculaAltura(atual->direita);
+	unsigned int alturaEsq = atual->calculaAltura(atual->esquerdo);
+	unsigned int alturaDir = atual->calculaAltura(atual->direito);
 	atual->altura = 1 + max(alturaEsq, alturaDir);
 	int bal = atual->fatorBalanceamento();
 
@@ -174,37 +177,37 @@ nohArvore *avl::arrumaBalanceamento(nohArvore *atual)
 	{
 		return atual;
 	}
-	if ((bal > 1) and (atual->calculaBalanceamento(atual->esquerda) >= 0))
+	if ((bal > 1) and (atual->calculaBalanceamento(atual->esquerdo) >= 0))
 	{
 		return rotacionaDireita(atual);
 	}
-	if ((bal > 1) and (atual->calculaBalanceamento(atual->esquerda) < 0))
+	if ((bal > 1) and (atual->calculaBalanceamento(atual->esquerdo) < 0))
 	{
-		atual->esquerda = rotacionaEsquerda(atual->esquerda);
-		atual->esquerda->pai = atual;
+		atual->esquerdo = rotacionaEsquerda(atual->esquerdo);
+		atual->esquerdo->pai = atual;
 		return rotacionaDireita(atual);
 	}
-	if (bal < -1 and (atual->calculaBalanceamento(atual->direita) <= 0))
+	if (bal < -1 and (atual->calculaBalanceamento(atual->direito) <= 0))
 	{
 		return rotacionaEsquerda(atual);
 	}
-	if ((bal < -1) and (atual->calculaBalanceamento(atual->direita) > 0))
+	if ((bal < -1) and (atual->calculaBalanceamento(atual->direito) > 0))
 	{
-		atual->direita = rotacionaDireita(atual->direita);
-		atual->direita->pai = atual;
+		atual->direito = rotacionaDireita(atual->direito);
+		atual->direito->pai = atual;
 		return rotacionaEsquerda(atual);
 	}
 	return NULL;
 }
 nohArvore *avl::rotacionaEsquerda(nohArvore *atual)
 {
-	nohArvore *aux = atual->direita;
+	nohArvore *aux = atual->direito;
 
-	atual->direita = aux->esquerda;
+	atual->direito = aux->esquerdo;
 
-	if (aux->esquerda != NULL)
+	if (aux->esquerdo != NULL)
 	{
-		aux->esquerda->pai = atual;
+		aux->esquerdo->pai = atual;
 	}
 
 	aux->pai = atual->pai;
@@ -213,20 +216,20 @@ nohArvore *avl::rotacionaEsquerda(nohArvore *atual)
 	{
 		raiz = aux;
 	}
-	else if (atual == atual->pai->esquerda)
+	else if (atual == atual->pai->esquerdo)
 	{
-		atual->pai->esquerda = aux;
+		atual->pai->esquerdo = aux;
 	}
 	else
 	{
-		atual->pai->direita = aux;
+		atual->pai->direito = aux;
 	}
 
-	aux->esquerda = atual;
+	aux->esquerdo = atual;
 	atual->pai = aux;
 
-	unsigned int alturaEsq = atual->calculaAltura(atual->esquerda);
-	unsigned int alturaDir = atual->calculaAltura(atual->direita);
+	unsigned int alturaEsq = atual->calculaAltura(atual->esquerdo);
+	unsigned int alturaDir = atual->calculaAltura(atual->direito);
 
 	atual->altura = 1 + max(alturaEsq, alturaDir);
 	aux->altura = 1 + max(alturaEsq, alturaDir);
@@ -236,29 +239,29 @@ nohArvore *avl::rotacionaEsquerda(nohArvore *atual)
 
 nohArvore *avl::rotacionaDireita(nohArvore *atual)
 {
-	nohArvore *aux = atual->esquerda;
-	atual->esquerda = aux->direita;
-	if (aux->direita != NULL)
+	nohArvore *aux = atual->esquerdo;
+	atual->esquerdo = aux->direito;
+	if (aux->direito != NULL)
 	{
-		aux->direita->pai = atual;
+		aux->direito->pai = atual;
 	}
 	aux->pai = atual->pai;
 	if (atual->pai == NULL)
 	{
 		raiz = aux;
 	}
-	else if (atual == atual->pai->esquerda)
+	else if (atual == atual->pai->esquerdo)
 	{
-		atual->pai->esquerda = aux;
+		atual->pai->esquerdo = aux;
 	}
 	else
 	{
-		atual->pai->direita = aux;
+		atual->pai->direito = aux;
 	}
-	aux->direita = atual;
+	aux->direito = atual;
 	atual->pai = aux;
-	unsigned int alturaEsq = atual->calculaAltura(atual->esquerda);
-	unsigned int alturaDir = atual->calculaAltura(atual->direita);
+	unsigned int alturaEsq = atual->calculaAltura(atual->esquerdo);
+	unsigned int alturaDir = atual->calculaAltura(atual->direito);
 	atual->altura = 1 + max(alturaEsq, alturaDir);
 	aux->altura = 1 + max(alturaEsq, alturaDir);
 	return aux;
@@ -274,8 +277,8 @@ void avl::percorrePosOrdemAux(nohArvore *atual, int nivel)
 {
 	if (atual != NULL)
 	{
-		percorrePosOrdemAux(atual->esquerda, nivel + 1);
-		percorrePosOrdemAux(atual->direita, nivel + 1);
+		percorrePosOrdemAux(atual->esquerdo, nivel + 1);
+		percorrePosOrdemAux(atual->direito, nivel + 1);
 		cout << atual->valor << " ";
 	}
 }
@@ -290,22 +293,20 @@ void avl::percorreInserindoEmArvoreAux(nohArvore *atual)
 {
 	if (atual != NULL)
 	{
-		percorreInserindoEmArvoreAux(atual->esquerda);
-		percorreInserindoEmArvoreAux(atual->direita);
+		percorreInserindoEmArvoreAux(atual->esquerdo);
+		percorreInserindoEmArvoreAux(atual->direito);
 		this->insereArvore(atual->valor);
 	}
 }
 
-
-
-void avl::armazenaArvoreEmVetorAux(nohArvore* atual, int *vetor, unsigned int *i)
+void avl::armazenaArvoreEmVetorAux(nohArvore *atual, int *vetor, unsigned int *i)
 {
-	if(atual == NULL)
+	if (atual == NULL)
 		return;
-	if(atual->esquerda != NULL)
-		armazenaArvoreEmVetorAux(atual->esquerda, vetor, i);
-	if(atual->direita != NULL)
-		armazenaArvoreEmVetorAux(atual->direita, vetor, i);
+	if (atual->esquerdo != NULL)
+		armazenaArvoreEmVetorAux(atual->esquerdo, vetor, i);
+	if (atual->direito != NULL)
+		armazenaArvoreEmVetorAux(atual->direito, vetor, i);
 	vetor[*i] = atual->valor;
 	(*i)++;
 }
@@ -324,49 +325,49 @@ nohArvore *avl::removeArvoreAux(nohArvore *atual, Dado dado)
 	nohArvore *novaRaizSubArvore = atual;
 	if (dado < atual->valor)
 	{
-		atual->esquerda = removeArvoreAux(atual->esquerda, dado);
+		atual->esquerdo = removeArvoreAux(atual->esquerdo, dado);
 	}
 	else if (dado > atual->valor)
 	{
-		atual->direita = removeArvoreAux(atual->direita, dado);
+		atual->direito = removeArvoreAux(atual->direito, dado);
 	}
 	else
 	{
-		if (atual->esquerda == NULL)
+		if (atual->esquerdo == NULL)
 		{
-			novaRaizSubArvore = atual->direita;
-			transplanta(atual, atual->direita);
+			novaRaizSubArvore = atual->direito;
+			transplanta(atual, atual->direito);
 		}
-		else if (atual->direita == NULL)
+		else if (atual->direito == NULL)
 		{
-			novaRaizSubArvore = atual->esquerda;
-			transplanta(atual, atual->direita);
+			novaRaizSubArvore = atual->esquerdo;
+			transplanta(atual, atual->direito);
 		}
 		else
 		{
-			nohArvore *sucessor = minimoAux(atual->direita);
+			nohArvore *sucessor = minimoAux(atual->direito);
 			novaRaizSubArvore = sucessor;
 			if (sucessor->pai != atual)
 			{
-				transplanta(sucessor, sucessor->direita);
+				transplanta(sucessor, sucessor->direito);
 				nohArvore *aux = sucessor->pai;
-				while (aux != atual->direita)
+				while (aux != atual->direito)
 				{
-					unsigned int alturaEsq = atual->calculaAltura(atual->esquerda);
-					unsigned int alturaDir = atual->calculaAltura(atual->direita);
+					unsigned int alturaEsq = atual->calculaAltura(atual->esquerdo);
+					unsigned int alturaDir = atual->calculaAltura(atual->direito);
 					aux->altura = 1 + max(alturaEsq, alturaDir);
 					aux = aux->pai;
 				}
-				sucessor->direita = arrumaBalanceamento(atual->direita);
-				sucessor->direita->pai = sucessor;
+				sucessor->direito = arrumaBalanceamento(atual->direito);
+				sucessor->direito->pai = sucessor;
 			}
 
 			transplanta(atual, sucessor);
-			sucessor->esquerda = atual->esquerda;
-			sucessor->esquerda->pai = sucessor;
+			sucessor->esquerdo = atual->esquerdo;
+			sucessor->esquerdo->pai = sucessor;
 		}
-		atual->esquerda = NULL;
-		atual->direita = NULL;
+		atual->esquerdo = NULL;
+		atual->direito = NULL;
 		tamanhoArvore--;
 		delete atual;
 	}
@@ -379,9 +380,9 @@ nohArvore *avl::removeArvoreAux(nohArvore *atual, Dado dado)
 
 nohArvore *avl::minimoAux(nohArvore *atual)
 {
-	while (atual->esquerda != NULL)
+	while (atual->esquerdo != NULL)
 	{
-		atual = atual->esquerda;
+		atual = atual->esquerdo;
 	}
 	return atual;
 }
@@ -397,15 +398,35 @@ bool avl::buscaArvore(int dado)
 		}
 		else if (atual->valor > dado)
 		{
-			atual = atual->esquerda;
+			atual = atual->esquerdo;
 		}
 		else
 		{
-			atual = atual->direita;
+			atual = atual->direito;
 		}
 	}
 	return false;
 }
+
+void avl::imprimeArvoreBonita()
+{
+	imprimeArvoreBonita("", raiz ,false);
+}
+
+
+void avl::imprimeArvoreBonita(const string &prefixo, const nohArvore* atual, bool esquerdo)
+{
+	if(atual != NULL)
+	{
+		cout << prefixo;
+		cout << (esquerdo ? "|---" : "'---");
+		cout << atual->valor << endl;
+		imprimeArvoreBonita(prefixo + (esquerdo ? "|   " : "   "), atual->esquerdo, true);
+		imprimeArvoreBonita(prefixo + (esquerdo ? "|   " : "   "), atual->direito, false);
+	}
+}
+
+
 
 class conjunto
 {
@@ -464,12 +485,12 @@ void conjunto::intersecao(conjunto &C1, conjunto &C2)
 	C1.mDados.armazenaArvoreEmVetorAux(C1.mDados.raiz, vetor1, &i);
 	C2.mDados.armazenaArvoreEmVetorAux(C2.mDados.raiz, vetor2, &j);
 	i = 0;
-	while(i < C1.mDados.tamanhoArvore)
+	while (i < C1.mDados.tamanhoArvore)
 	{
 		j = 0;
-		while(j < C2.mDados.tamanhoArvore)
+		while (j < C2.mDados.tamanhoArvore)
 		{
-			if(vetor1[i] == vetor2[j])
+			if (vetor1[i] == vetor2[j])
 			{
 				this->mDados.insereArvore(vetor2[j]);
 			}
@@ -486,21 +507,21 @@ void conjunto::diferenca(conjunto &C1, conjunto &C2)
 	unsigned int i = 0, j = 0;
 	C1.mDados.armazenaArvoreEmVetorAux(C1.mDados.raiz, vetor1, &i);
 	C2.mDados.armazenaArvoreEmVetorAux(C2.mDados.raiz, vetor2, &j);
-	i = 0;
-	while(i < C1.mDados.tamanhoArvore)
+	for(i = 0; i < C1.mDados.tamanhoArvore; i++)
 	{
-		j = 0;
-		while(j < C2.mDados.tamanhoArvore)
+		bool existe = false;
+		for(j = 0; j < C2.mDados.tamanhoArvore; j++)
 		{
-			if(vetor1[i] != vetor2[j])
+			if(vetor1[i] == vetor2[j])
 			{
-				this->mDados.insereArvore(vetor1[i]);
+				existe = true;
 			}
-			j++;
 		}
-		i++;
+		if(not existe)
+		{
+			this->mDados.insereArvore(vetor1[i]);
+		}
 	}
-
 }
 
 unsigned conjunto::tamanho()
@@ -515,7 +536,7 @@ void conjunto::imprime()
 
 void conjunto::depura()
 {
-	//TODO
+	this->mDados.imprimeArvoreBonita();
 }
 
 // função que retorna uma posição no vetor para um dado caracter maiúsculo
