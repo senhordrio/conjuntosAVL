@@ -15,8 +15,8 @@ private:
 	nohArvore *pai;
 	Dado valor;
 	int altura;
-	int calculaBalanceamento(nohArvore *no);
-	unsigned int calculaAltura(nohArvore *no);
+	int calculaBalanceamento(nohArvore *noh);
+	unsigned int calculaAltura(nohArvore *noh);
 
 public:
 	int fatorBalanceamento();
@@ -31,9 +31,8 @@ class avl
 private:
 	nohArvore *raiz;
 	unsigned tamanhoArvore;
-	void percorrePosOrdemAux(nohArvore *atual, int nivel);
-	nohArvore *maximoAux(nohArvore *atual);
-	nohArvore *minimoAux(nohArvore *atual);
+	void percorrePosOrdemAux(nohArvore *atual);
+	nohArvore *minimo(nohArvore *atual);
 	nohArvore *insereArvoreAux(nohArvore *atual, Dado dado);
 	nohArvore *arrumaBalanceamento(nohArvore *atual);
 	nohArvore *rotacionaEsquerda(nohArvore *atual);
@@ -48,13 +47,10 @@ public:
 	void insereArvore(Dado dado);
 	void removeArvore(Dado dado);
 	void percorrePosOrdem();
-	Dado maximo();
-	Dado minimo();
 	void transplanta(nohArvore *antigo, nohArvore *novo);
 	bool buscaArvore(int dado);
 	unsigned getTamanhoArvore();
 	void percorreInserindoEmArvore(nohArvore *raiz);
-	void intersecaoArvores(nohArvore *raizC1, nohArvore *raizC2);
 	void imprimeArvoreBonita();
 	void imprimeArvoreBonita(const string &prefixo, const nohArvore* raiz, bool esquerdo);
 };
@@ -269,16 +265,16 @@ nohArvore *avl::rotacionaDireita(nohArvore *atual)
 
 void avl::percorrePosOrdem()
 {
-	percorrePosOrdemAux(raiz, 0);
+	percorrePosOrdemAux(raiz);
 	cout << endl;
 }
 
-void avl::percorrePosOrdemAux(nohArvore *atual, int nivel)
+void avl::percorrePosOrdemAux(nohArvore *atual)
 {
 	if (atual != NULL)
 	{
-		percorrePosOrdemAux(atual->esquerdo, nivel + 1);
-		percorrePosOrdemAux(atual->direito, nivel + 1);
+		percorrePosOrdemAux(atual->esquerdo);
+		percorrePosOrdemAux(atual->direito);
 		cout << atual->valor << " ";
 	}
 }
@@ -345,7 +341,7 @@ nohArvore *avl::removeArvoreAux(nohArvore *atual, Dado dado)
 		}
 		else
 		{
-			nohArvore *sucessor = minimoAux(atual->direito);
+			nohArvore *sucessor = minimo(atual->direito);
 			novaRaizSubArvore = sucessor;
 			if (sucessor->pai != atual)
 			{
@@ -378,7 +374,7 @@ nohArvore *avl::removeArvoreAux(nohArvore *atual, Dado dado)
 	return arrumaBalanceamento(novaRaizSubArvore);
 }
 
-nohArvore *avl::minimoAux(nohArvore *atual)
+nohArvore *avl::minimo(nohArvore *atual)
 {
 	while (atual->esquerdo != NULL)
 	{
